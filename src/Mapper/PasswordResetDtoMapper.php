@@ -9,25 +9,15 @@ use DateTimeZone;
 use BlackCat\Database\Support\DtoHydrator;
 
 /**
- * Bidirectional mapper between DB rows and DTO PasswordResetDto.
+ * Bidirectional mapper between DB rows and DTO PasswordResetDto:
+ * - Casting/JSON/binary/datetime handled by the universal DtoHydrator
+ * - Column -> property mapping is driven by COL_TO_PROP (populated by the generator)
+ * - Tolerant to missing columns (keeps null)
  */
 final class PasswordResetDtoMapper
 {
     /** @var array<string,string> Column -> DTO property */
-    private const COL_TO_PROP = [
-        'id' => 'id',
-        'user_id' => 'userId',
-        'token_hash' => 'tokenHash',
-        'selector' => 'selector',
-        'validator_hash' => 'validatorHash',
-        'key_version' => 'keyVersion',
-        'expires_at' => 'expiresAt',
-        'created_at' => 'createdAt',
-        'used_at' => 'usedAt',
-        'ip_hash' => 'ipHash',
-        'ip_hash_key_version' => 'ipHashKeyVersion',
-        'user_agent' => 'userAgent',
-    ];
+    private const COL_TO_PROP = [ 'id' => 'id', 'user_id' => 'userId', 'token_hash' => 'tokenHash', 'selector' => 'selector', 'validator_hash' => 'validatorHash', 'key_version' => 'keyVersion', 'expires_at' => 'expiresAt', 'created_at' => 'createdAt', 'used_at' => 'usedAt', 'ip_hash' => 'ipHash', 'ip_hash_key_version' => 'ipHashKeyVersion', 'user_agent' => 'userAgent' ];
 
     /** @var string[] */
     private const BOOL_COLS   = [];
@@ -56,7 +46,10 @@ final class PasswordResetDtoMapper
     }
 
     /**
+     * Hydrate a DTO from a DB row (associative array).
+     *
      * @param array<string,mixed> $row
+     * @return PasswordResetDto
      */
     public static function fromRow(array $row): PasswordResetDto
     {
@@ -81,8 +74,11 @@ final class PasswordResetDtoMapper
     }
 
     /**
-     * @param PasswordResetDto $dto
-     * @param string[]|null $onlyProps
+     * Serialize a DTO back into a DB row (for insert/update).
+     * - JSON -> string, DATETIME -> 'Y-m-d H:i:s.u', BOOL -> 0/1, BINARY -> raw bytes
+     *
+     * @param PasswordResetDto   $dto
+     * @param string[]|null   $onlyProps  optional whitelist of DTO properties to serialize
      * @return array<string,mixed>
      */
     public static function toRow(PasswordResetDto $dto, ?array $onlyProps = null): array
@@ -101,6 +97,7 @@ final class PasswordResetDtoMapper
         );
     }
 
+    /** Same as toRow(), but removes keys with null values (does not overwrite DB values with NULL). */
     public static function toRowNonNull(PasswordResetDto $dto, ?array $onlyProps = null): array
     {
         $row = self::toRow($dto, $onlyProps);
@@ -111,8 +108,12 @@ final class PasswordResetDtoMapper
     }
 
     /**
+     * Compute changed columns relative to the original row (assoc array from DB).
+     * Returns only differing pairs col => newValue.
+     *
      * @param array<string,mixed> $original
-     * @param string[] $ignore
+     * @param string[] $ignore   Columns to skip during comparison (e.g., updated_at)
+     * @param bool $coerce       Normalize scalars (0 vs '0', true vs 1) before comparing
      * @return array<string,mixed>
      */
     public static function diff(PasswordResetDto $dto, array $original, array $ignore = [], bool $coerce = true): array
@@ -132,7 +133,7 @@ final class PasswordResetDtoMapper
                 $vn = is_bool($v) ? (int)$v : (string)$v;
                 $on = is_bool($orig) ? (int)$orig : (string)$orig;
                 if ($vn === $on) continue;
-            } elseif ($v == $orig) {
+            } elseif ($v == $orig) { // looser comparison for nested structures
                 continue;
             }
 
@@ -142,6 +143,8 @@ final class PasswordResetDtoMapper
     }
 
     /**
+     * Batch hydration: array of rows -> array of DTOs.
+     *
      * @param array<int,array<string,mixed>> $rows
      * @return array<int,PasswordResetDto>
      */
@@ -172,11 +175,12 @@ final class PasswordResetDtoMapper
             $decl = (array) Definitions::piiColumns();
 
             if ($decl) {
-                $map = self::COL_TO_PROP;
-                $rev = array_flip($map);
+                $map = self::COL_TO_PROP;         // col -> prop
+                $rev = array_flip($map);          // prop -> col
 
                 foreach ($decl as $name) {
                     $name = (string) $name;
+                    // accept both 'email' (column) and 'emailHash' (property)
                     $col = array_key_exists($name, $row) ? $name : ($rev[$name] ?? $name);
                     $pii[$col] = true;
                 }
@@ -196,6 +200,7 @@ final class PasswordResetDtoMapper
     }
 
     /**
+     * Lazy hydration - generates DTOs without buffering the entire collection.
      * @param iterable<int,array<string,mixed>> $rows
      * @return \Generator<int,PasswordResetDto>
      */
@@ -206,4 +211,3 @@ final class PasswordResetDtoMapper
         }
     }
 }
-

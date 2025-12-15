@@ -14,14 +14,14 @@ final class PasswordResetDto implements \JsonSerializable {
         public readonly int $userId,
         #[\SensitiveParameter] public readonly ?string $tokenHash,
         public readonly string $selector,
-        #[\SensitiveParameter] public readonly ?string $validatorHash,
+        public readonly ?string $validatorHash,
         public readonly ?string $keyVersion,
         public readonly \DateTimeImmutable $expiresAt,
         public readonly \DateTimeImmutable $createdAt,
         public readonly ?\DateTimeImmutable $usedAt,
         #[\SensitiveParameter] public readonly ?string $ipHash,
         public readonly ?string $ipHashKeyVersion,
-        public readonly ?string $userAgent,
+        public readonly ?string $userAgent
     ) {}
 
     /** Suitable for serialization/logging (without large blobs). */
@@ -38,10 +38,10 @@ final class PasswordResetDto implements \JsonSerializable {
        $a = $this->toArray();
        foreach ($a as $k => $v) {
            if ($v instanceof \DateTimeInterface) {
+               // ISO-8601 with a timezone; switch to 'Y-m-d H:i:s.u' if needed
                $a[$k] = $v->format(\DateTimeInterface::ATOM);
            }
        }
        return $a;
    }
 }
-

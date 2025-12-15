@@ -1,4 +1,4 @@
--- Auto-generated from schema-map-postgres.yaml
+-- Auto-generated from schema-map-postgres.yaml (map@sha1:FAEA49A5D5F8FAAD9F850D0F430ED451C5C1D707)
 -- engine: postgres
 -- table:  password_resets
 
@@ -16,4 +16,3 @@ CREATE TABLE IF NOT EXISTS password_resets (
   ip_hash_key_version VARCHAR(64) NULL,
   user_agent VARCHAR(1024) NULL
 );
-
