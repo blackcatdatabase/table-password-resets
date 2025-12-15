@@ -9,6 +9,12 @@ use BlackCat\Core\Database;
 /**
  * Per-repo Criteria - thin layer on top of the central BlackCat\Database\Support\Criteria.
  *
+ * Tokens filled by the generator:
+ *  - FILTERABLE_COLUMNS_ARRAY   e.g., ["id","tenant_id","status","created_at"]
+ *  - SEARCHABLE_COLUMNS_ARRAY   e.g., ["order_no","customer_email"]
+ *  - DEFAULT_PER_PAGE           e.g., 50
+ *  - MAX_PER_PAGE               e.g., 500
+ *
  * All the "hard" logic (dialect, LIKE/ILIKE, NULLS LAST, tenancy, seek, join params,
  * andWhere()/bind() compatibility, etc.) lives in BaseCriteria. Here we only declare whitelists
  * and per-repo limits plus an optional fromDb() factory.
@@ -26,32 +32,19 @@ final class Criteria extends BaseCriteria
     /** Columns that are safe to use inside WHERE filters. */
     protected function filterable(): array
     {
-        return [
-            'id',
-            'user_id',
-            'token_hash',
-            'selector',
-            'validator_hash',
-            'key_version',
-            'expires_at',
-            'created_at',
-            'used_at',
-            'ip_hash',
-            'ip_hash_key_version',
-            'user_agent',
-        ];
+        return [ 'id', 'user_id', 'token_hash', 'selector', 'validator_hash', 'key_version', 'expires_at', 'created_at', 'used_at', 'ip_hash', 'ip_hash_key_version', 'user_agent' ];
     }
 
     /** Columns used for full-text LIKE/ILIKE searches. */
     protected function searchable(): array
     {
-        return [ 'token_hash', 'selector', 'key_version', 'user_agent' ];
+        return [ 'token_hash', 'selector', 'key_version', 'ip_hash_key_version', 'user_agent' ];
     }
 
     /** Columns allowed in ORDER BY (falls back to filterable() when empty). */
     protected function sortable(): array
     {
-        return [ 'id', 'user_id', 'selector', 'expires_at', 'created_at', 'used_at' ];
+        return [ 'id', 'user_id', 'token_hash', 'selector', 'key_version', 'expires_at', 'created_at', 'used_at', 'ip_hash_key_version', 'user_agent' ];
     }
 
     /**
@@ -78,6 +71,11 @@ final class Criteria extends BaseCriteria
 
     /**
      * QoL factory: detect dialect based on the PDO driver and optionally apply a tenancy filter.
+     *
+     * Example:
+     *   $crit = Criteria::fromDb($db, tenantId: 42)
+     *                   ->search("foo")
+     *                   ->orderBy("created_at","DESC");
      */
     public static function fromDb(
         Database $db,
@@ -85,7 +83,7 @@ final class Criteria extends BaseCriteria
         string $tenantColumn = "tenant_id",
         bool $quoteIdentifiers = false
     ): static {
-        $c = new static();
+        $c = new static(); // previously: new self()
 
         $c->setDialectFromDatabase($db);
         if ($quoteIdentifiers) { $c->enableIdentifierQuoting(true); }
@@ -112,4 +110,3 @@ final class Criteria extends BaseCriteria
     }
 
 }
-

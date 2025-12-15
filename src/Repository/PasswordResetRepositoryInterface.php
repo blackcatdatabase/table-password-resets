@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace BlackCat\Database\Packages\PasswordResets\Repository;
 
+use BlackCat\Database\Packages\PasswordResets\Criteria;
 use BlackCat\Database\Contracts\ContractRepository as RepoContract;
 use BlackCat\Database\Contracts\KeysetRepository as KeysetRepoContract;
 use BlackCat\Database\Packages\PasswordResets\Dto\PasswordResetDto as Dto;
@@ -50,4 +51,3 @@ interface PasswordResetRepositoryInterface extends RepoContract, KeysetRepoContr
     public function paginateBySeek(object $criteria, array $order, ?array $cursor, int $limit): array;
     public function lockById(int|string|array $id, string $mode = 'wait', string $strength = 'update'): ?array;
 }
-
