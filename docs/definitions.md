@@ -3,20 +3,20 @@
 Password reset tokens for users.
 
 ## Columns
-| Column | Type | Null | Default | Description |
-| --- | --- | --- | --- | --- |
-| id | BIGINT | NO |  | Surrogate primary key. |
-| user_id | BIGINT | NO |  | Related user (FK users.id). |
-| token_hash | CHAR(64) | YES |  | Full token hash (hex/char). |
-| selector | CHAR(12) | NO |  | Short public selector (unique). |
-| validator_hash | mysql: BINARY(32) / postgres: BYTEA | YES |  | Hashed validator part. |
-| key_version | VARCHAR(64) | YES |  | Key version used for hashing/encryption. |
-| expires_at | mysql: DATETIME(6) / postgres: TIMESTAMPTZ(6) | NO |  | Expiration timestamp (UTC). |
-| created_at | mysql: DATETIME(6) / postgres: TIMESTAMPTZ(6) | NO | CURRENT_TIMESTAMP(6) | Creation timestamp (UTC). |
-| used_at | mysql: DATETIME(6) / postgres: TIMESTAMPTZ(6) | YES |  | When token was used, if so. |
-| ip_hash | mysql: BINARY(32) / postgres: BYTEA | YES |  | Hashed requester IP. |
-| ip_hash_key_version | VARCHAR(64) | YES |  | Key version for ip_hash. |
-| user_agent | VARCHAR(1024) | YES |  | Requester user agent. |
+| Column | Type | Null | Default | Description | Crypto |
+| --- | --- | --- | --- | --- | --- |
+| id | BIGINT | NO |  | Surrogate primary key. |  |
+| user_id | BIGINT | NO |  | Related user (FK users.id). |  |
+| token_hash | CHAR(64) | YES |  | Full token hash (hex/char). | `hmac`<br/>ctx: `db.hmac.password_resets`<br/>encoding: `hex`<br/>kv: `key_version` |
+| selector | CHAR(12) | NO |  | Short public selector (unique). |  |
+| validator_hash | mysql: BINARY(32) / postgres: BYTEA | YES |  | Hashed validator part. | `hmac`<br/>ctx: `db.hmac.password_resets`<br/>kv: `key_version` |
+| key_version | VARCHAR(64) | YES |  | Key version used for hashing/encryption. | key version for: `token_hash`, `validator_hash` |
+| expires_at | mysql: DATETIME(6) / postgres: TIMESTAMPTZ(6) | NO |  | Expiration timestamp (UTC). |  |
+| created_at | mysql: DATETIME(6) / postgres: TIMESTAMPTZ(6) | NO | CURRENT_TIMESTAMP(6) | Creation timestamp (UTC). |  |
+| used_at | mysql: DATETIME(6) / postgres: TIMESTAMPTZ(6) | YES |  | When token was used, if so. |  |
+| ip_hash | mysql: BINARY(32) / postgres: BYTEA | YES |  | Hashed requester IP. | `hmac`<br/>ctx: `db.hmac.password_resets.ip_hash`<br/>kv: `ip_hash_key_version` |
+| ip_hash_key_version | VARCHAR(64) | YES |  | Key version for ip_hash. | key version for: `ip_hash` |
+| user_agent | VARCHAR(1024) | YES |  | Requester user agent. |  |
 
 ## Engine Details
 
