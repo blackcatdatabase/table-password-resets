@@ -1,0 +1,54 @@
+{
+  "tables": {
+    "password_resets": {
+      "columns": {
+        "created_at": {
+          "strategy": "passthrough"
+        },
+        "expires_at": {
+          "strategy": "passthrough"
+        },
+        "id": {
+          "strategy": "passthrough"
+        },
+        "ip_hash": {
+          "context": "db.hmac.password_resets.ip_hash",
+          "key_version_column": "ip_hash_key_version",
+          "strategy": "hmac",
+          "write_key_version": true
+        },
+        "ip_hash_key_version": {
+          "strategy": "passthrough"
+        },
+        "key_version": {
+          "strategy": "passthrough"
+        },
+        "selector": {
+          "strategy": "passthrough"
+        },
+        "token_hash": {
+          "context": "db.hmac.password_resets",
+          "encoding": "hex",
+          "key_version_column": "key_version",
+          "strategy": "hmac",
+          "write_key_version": true
+        },
+        "used_at": {
+          "strategy": "passthrough"
+        },
+        "user_agent": {
+          "strategy": "passthrough"
+        },
+        "user_id": {
+          "strategy": "passthrough"
+        },
+        "validator_hash": {
+          "context": "db.hmac.password_resets",
+          "key_version_column": "key_version",
+          "strategy": "hmac",
+          "write_key_version": true
+        }
+      }
+    }
+  }
+}
