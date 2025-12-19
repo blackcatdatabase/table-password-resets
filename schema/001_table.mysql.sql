@@ -1,4 +1,4 @@
--- Auto-generated from schema-map-mysql.yaml
+-- Auto-generated from schema-map-mysql.yaml (map@sha1:0D716345C0228A9FD8972A3D31574000D05317DB)
 -- engine: mysql
 -- table:  password_resets
 
@@ -21,4 +21,3 @@ CREATE TABLE IF NOT EXISTS password_resets (
   INDEX idx_pr_used (used_at),
   INDEX idx_pr_ip_hash (ip_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
-

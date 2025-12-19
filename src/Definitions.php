@@ -131,4 +131,3 @@ final class Definitions {
         return in_array('uuid', $cols, true) || in_array('uuid_bin', $cols, true);
     }
 }
-
